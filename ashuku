@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Copyright muflax <mail@muflax.com>, 2009
+# License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
+
+import os.path, sys, unicodedata
+try:
+    import yaml
+except ImportError:
+    print("Couldn't load libyaml.")
+    sys.exit(1)
+
+def read_config(path):
+    path = os.path.expanduser(path)
+    if os.path.exists(path):
+        return parse_config(path)
+    else:
+        print("No config found. Creating %s for you. Modify to your liking." %
+              path)
+        f = open(path, "w")
+        f.write('---\n'
+                '# Each attribute must be of one of the following types:\n'
+				'# - qualitive (range from -2 to +2)\n'
+				'# - quantitive\n'
+				'# - cumulative (like quantitive, but all daily values are added up)\n'
+				'#\n'
+				'# All quantitive types also take the optional property "unit". When given, it\n'
+				'# will also be optional for input, so that "ashuku add weight 78" and\n'
+				'# "ashuku add weight 78kg" are identical.\n'
+				'# The value "time" is used for the format XhYmZs, as in 3h20m10s. When no unit\n'
+				'# is given, then minutes are assumed.\n'
+				'#\n'
+				'# You can also specify an alias via "alias". The normal name will be used for\n'
+				'# the output, but it may be inconvenient to type.\n'
+				'\n'
+				'attributes:\n'
+				'    happiness:\n'
+				'        type: qualitive\n'
+				'    sleep:\n'
+				'        type: cumulative\n'
+				'        unit: time\n'
+				'    weight:\n'
+				'        type: quantitive\n'
+				'        unit: kg\n'
+				'    日本語:\n'
+				'        type cumulative\n'
+				'        unit: time\n'
+				'        alias: japanese\n'
+				'...')
+        sys.exit(1)
+
+def parse_config(path):
+    f = open(path, "r")
+    config = yaml.safe_load(f)
+    return config
+
+def main():
+    config = read_config("~/.ashuku")
+
+if __name__ == "__main__":
+    main()
+
