@@ -89,6 +89,23 @@ def show(data, attributes, args):
             if not matches:
                 del(attributes[attr])
 
+    # print header
+    header = " " * (uni_len("09-09-09") + 1)
+    header2 = "-" * uni_len(header)
+    for attr in sorted(attributes.keys()):
+        header += " | " + attr
+        header2 += "-+-" + "-" * uni_len(attr)
+    print(header)
+    print(header2)
+
+    # print body
+    table_data = parse_data(data)
+
+    print(table_data)
+
+def parse_data(data):
+    table = {}
+    return table
 
 def main(args):
     # Initialization #
