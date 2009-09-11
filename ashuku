@@ -3,7 +3,7 @@
 # Copyright muflax <mail@muflax.com>, 2009
 # License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
 
-import os.path, sys, unicodedata
+import datetime, os.path, sys, unicodedata
 try:
     import yaml
 except ImportError:
@@ -55,16 +55,87 @@ def read_config(path):
 
     return config
 
+def uni_len(s):
+    "Returns the real lenght of a string wrt half-width and full-width."
+    l = 0
+    for c in s:
+        if unicodedata.east_asian_width(c) == "W":
+            l += 2
+        else:
+            l += 1
+    return l
+
+def show(data, attributes, args):
+    days = 14
+    # try to parse first argument as days
+    if args:
+        try:
+            days = int(args[0])
+            args = args[1:]
+        except ValueError:
+            pass
+    
+    # throw away all attributes we don't wanna show
+    if args:
+        attrs = list(attributes.keys())
+        for attr in attrs:
+            matches = False
+            for f in args:
+                try:    
+                    if attr.startswith(f) or attributes[attr]["alias"].startswith(f):
+                        matches = True
+                except KeyError:
+                    pass
+            if not matches:
+                del(attributes[attr])
+
+
 def main(args):
+    # Initialization #
+    ##################
     config = read_config("~/.ashuku")
     try:
         attributes = config["attributes"]
         settings = config["settings"]
+        
+        data_path = os.path.expanduser(settings["path"])
     except KeyError as err:
         print("Error: Config incomplete: %s missing." % err)
         sys.exit(1)
 
-    
+    data_dir = os.path.dirname(data_path) 
+    if not os.path.exists(data_dir):
+        print("Warning: Directory %s doesn't exist. Creating it for you." %
+              data_dir)
+        os.mkdir(data_dir)
+        
+    if not os.path.exists(data_path):
+        print("Warning: Data file %s doesn't exist. Creating it for you." %
+              data_path)
+    data = yaml.safe_load(open(data_path, "r"))
+
+    # Get the command #
+    ###################
+    if len(args) > 1:
+        command = args[1]
+    else:
+        command = "show"
+
+    if "add".startswith(command):
+        add(data, attributes, args[2:])
+        write_data(data)
+    elif "correlate".startswith(command):
+        correlate(data)
+    elif "graph".startswith(command):
+        graph(data, args[2:])
+    elif "show".startswith(command):
+        show(data, attributes, args[2:])
+    elif "undo".startswith(command):
+        undo(data)
+        write_data(data)
+    else:
+        print("Error: No command %s." % command)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main(sys.argv)
