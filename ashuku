@@ -20,6 +20,7 @@ except ImportError:
 PROFILE = 0
 if PROFILE:
     import cProfile as profile
+    import pstats
 
 class Ashuku:
     length = {}
@@ -133,14 +134,12 @@ class Ashuku:
         return l
 
     def show(self, args):
-        days = 14
         # try to parse first argument as days
-        if args:
-            try:
-                days = int(args[0])
-                args = args[1:]
-            except ValueError:
-                pass
+        try:
+            days = int(args[0])
+            args = args[1:]
+        except (ValueError, IndexError):
+            days = 14
         
         # throw away all attributes we don't wanna show
         if args:
@@ -157,10 +156,12 @@ class Ashuku:
                 if not matches:
                     del(self.attributes[attr])
 
+        keys = sorted(self.attributes.keys())
+
         # print header
         header = " " * (self.uni_len("09-09-09") + 1)
         header2 = "-" * self.uni_len(header)
-        for attr in sorted(self.attributes.keys()):
+        for attr in keys:
             header += " | " + attr
             header2 += "-+-" + "-" * self.uni_len(attr)
         print(header)
@@ -223,6 +224,8 @@ def main(args):
 
 if __name__ == "__main__":
     if PROFILE:
-        profile.run("main(sys.argv)")
+        profile.run("main(sys.argv)", "profile.log")
+        p = pstats.Stats("profile.log")
+        p.sort_stats("time").print_stats(.5)
     else:
         main(sys.argv)
