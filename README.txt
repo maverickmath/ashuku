@@ -75,6 +75,10 @@ use more variables. For example, if you think that "mood" is too complex for
 only 5 values, than split up "mood", like "motivation", "happiness" and 
 "stress". You will also see more correlations that way.
 
+Normally, attributes have only one score per day. If you input a second one, 
+then it will overwrite the old one. The only exception here are cumulative
+scores that add up. This is useful when tracking time.
+
 Example
 =======
 

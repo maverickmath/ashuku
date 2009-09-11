@@ -3,7 +3,8 @@
 # Copyright muflax <mail@muflax.com>, 2009
 # License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
 
-import datetime, os.path, sys, unicodedata
+import os.path, re, sys, unicodedata
+from datetime import datetime, timedelta, time
 
 try:
     import yaml
@@ -109,22 +110,56 @@ def show(data, attributes, args):
     print(header2)
 
     # print body
-    table_data = parse_data(data)
+    table_data = parse_data(data, attributes, days)
 
-    print(table_data)
-
-def parse_data(data):
+def parse_data(data, attributes, days):
     table = {}
-    #print(data)
-    for entry in data:
-        # timezone anpassen
-        #print(entry)
-        try:
-            pass
-        except KeyError as err:
-            print("Error: Incomplete entry: %s missing.")
+    today = datetime.today()
+    shown_dates = [date for date in data if (today - date).days < days]
+    time_re = re.compile("^((?P<hour>\d+)h)?((?P<min>\d+)m)?((?P<sec>\d+)s)?$")
+
+    for date in sorted(shown_dates):
+        # I'm honestly not sure if I should just keep the timezone as it is
+        # or if I should try to adjust it. I'll keep it as-is for now.
+        day = date.strftime("%Y/%m/%d")
+        for attr in data[date]:
+            if not attr in attributes:
+                continue
+            value = data[date][attr]
+            try:
+                td = table[day]
+                if attributes[attr]["type"] == "cumulative":
+                    try:
+                        old_value = table[day][attr]
+                    except KeyError:
+                        old_value = 0
+                    
+                    try:
+                        if attributes[attr]["unit"] == "time":
+                            value = parse_time(time_re, value)
+                    except KeyError:
+                        pass
+                    
+                    value += old_value
+
+                table[day][attr] = value
+            except KeyError:
+                try:
+                    if attributes[attr]["unit"] == "time":
+                        value = parse_time(time_re, value)
+                except KeyError:
+                    pass
+                table[day] = {attr: value}
 
     return table
+
+def parse_time(time_re, value):
+    m = time_re.match(value)
+    hour, min, sec = m.group("hour", "min", "sec")
+    hour = int(hour or "0")
+    min = int(min or "0")
+    sec = int(sec or "0")
+    return hour * 3600 + min * 60 + sec
 
 def main(args):
     # Initialization #
@@ -132,10 +167,14 @@ def main(args):
     config = read_config("~/.ashuku")
     try:
         attributes = config["attributes"]
+        types = {"cumulative", "quantitive", "qualitive"}
+        for attr in attributes:
+            t = attributes[attr]["type"]
+            assert t in types
         settings = config["settings"]
         
         data_path = os.path.expanduser(settings["path"])
-    except KeyError as err:
+    except (KeyError, AssertionError) as err:
         print("Error: Config incomplete: %s missing." % err)
         sys.exit(1)
 

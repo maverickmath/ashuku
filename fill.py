@@ -12,7 +12,7 @@ def main():
     entries = [{"sleep": "25m"},
                {"weight": "78"},
                {"日本語": "1h20m"}]
-    for i in range(10000):
+    for i in range(1000):
         dt = timedelta(days=random.randint(0, 365), seconds=random.randint(0,60*60*24))
         d = datetime.now() - dt
         data[d.strftime("%Y-%m-%d %H:%M:%S")] = random.choice(entries).copy()
