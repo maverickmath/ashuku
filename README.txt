@@ -105,7 +105,7 @@ attributes:
         type: quantitive
         unit: kg
     日本語:
-        type cumulative
+        type: cumulative
         unit: time
         alias: japanese
 ...

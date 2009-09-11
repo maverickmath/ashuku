@@ -7,13 +7,14 @@ import os.path, sys, unicodedata
 try:
     import yaml
 except ImportError:
-    print("Couldn't load libyaml.")
+    print("Error: Couldn't load libyaml.")
     sys.exit(1)
 
 def read_config(path):
     path = os.path.expanduser(path)
     if os.path.exists(path):
-        return parse_config(path)
+        f = open(path, "r")
+        config = yaml.safe_load(f)
     else:
         print("No config found. Creating %s for you. Modify to your liking." %
               path)
@@ -43,20 +44,27 @@ def read_config(path):
 				'        type: quantitive\n'
 				'        unit: kg\n'
 				'    日本語:\n'
-				'        type cumulative\n'
+                '        type: cumulative\n'
 				'        unit: time\n'
 				'        alias: japanese\n'
+                '\n'
+                'settings:\n'
+                '    path: ~/txt/ashuku.txt\n'
 				'...')
         sys.exit(1)
 
-def parse_config(path):
-    f = open(path, "r")
-    config = yaml.safe_load(f)
     return config
 
-def main():
+def main(args):
     config = read_config("~/.ashuku")
+    try:
+        attributes = config["attributes"]
+        settings = config["settings"]
+    except KeyError as err:
+        print("Error: Config incomplete: %s missing." % err)
+        sys.exit(1)
+
+    
 
 if __name__ == "__main__":
-    main()
-
+    main(sys.argv)
