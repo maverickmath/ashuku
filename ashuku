@@ -263,7 +263,18 @@ class Ashuku:
         print("todo :)")
 
     def undo(self):
-        print("todo :)")
+        keys = sorted(self.data.keys())
+        try:
+            undo_key = keys[-1]
+            print("Undoing {}:".format(undo_key))
+            for pairs in self.data[undo_key]:
+                for k, v in pairs.items():
+                    print("->", k, v)
+            del(self.data[undo_key])
+        except IndexError:
+            print("No data left; doing nothing.")
+            sys.exit(0)
+
     def write_data(self):
         try:
             f = tempfile.NamedTemporaryFile(mode="w+", 
