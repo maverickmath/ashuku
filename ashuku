@@ -320,6 +320,7 @@ class Ashuku:
             # string.center is not used because it doesn't understand
             # full-width characters
             key_width = self.uni_len(key)
+            print(key, col_width[key], key_width)
             header += " | " + (" " * (col_width[key] - key_width)) + key
             header_div += "-+-" + ("-" * col_width[key])
         print(header)
@@ -406,7 +407,7 @@ class Ashuku:
             if self.attributes[key]["type"] == "qualitative":
                 col_width[key] = max(2, self.uni_len(key))
             else:
-                widths = [0]
+                widths = []
                 for day in table_data:
                     try:
                         if self.units[key] == "time":
@@ -417,7 +418,7 @@ class Ashuku:
                                                 self.units[key])
                         widths.append(self.uni_len(str))
                     except KeyError:
-                        pass
+                        widths.append(self.uni_len(self.empty_cell))
 
                 col_width[key] = max(max(widths), self.uni_len(key))
         return col_width
