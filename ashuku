@@ -195,6 +195,7 @@ class Ashuku:
                     raise ValueError
             except (IndexError, ValueError):
                 print("Error: Missing value for '{}'.".format(key))
+                print("No changes written.")
                 sys.exit(1)
             key = self.unique_completion(key, self.attributes)
            
@@ -206,11 +207,13 @@ class Ashuku:
                         raise ValueError
                 except (ValueError, TypeError):
                     print("Error: Score for '{}' must be in -2..+2.".format(key))
+                    print("No changes written.")
                     sys.exit(1)
             else:
                 if self.units[key] == "time":
                     if not self.time_re.match(value):
                         print("Error: Invalid time format. Must be XhYmZs, was '{}'.".format(value))
+                        print("No changes written.")
                         sys.exit(1)
                 elif self.is_int(value):
                     value = int(value)
@@ -218,6 +221,7 @@ class Ashuku:
                     value = float(value)
                 else:
                     print("Error: Score for '{}' must be a number.".format(key))
+                    print("No changes written.")
                     sys.exit(1)
             
             # let's add it
@@ -225,7 +229,7 @@ class Ashuku:
                 self.data[self.now].append( {key: value} )
             except KeyError:
                 self.data[self.now] = [ {key: value} ]
-            print("Added:", key, value)
+            print("Adding:", key, value)
 
     def is_int(self, x):
         try: 
