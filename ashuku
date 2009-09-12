@@ -27,17 +27,9 @@ class Ashuku:
     time_re = re.compile("^((?P<hour>\d+)h)?((?P<min>\d+)m)?((?P<sec>\d+)s)?$")
     # all possible attribute types
     types = {"cumulative", "quantitive", "qualitative"}
-    # date format, must be unique for every day (otherwise arbitrary)
-    date_fmt = "%Y/%m/%d"
-    # what units to use when showing time
-    time_units = {"hour": "h", "min": "m", "sec": "s"}
-    # what to show instead of an empty cell
-    empty_cell = "-"
     
     # cached lengths
     length = {}
-    # cached date
-    today = datetime.today()
 
     def __init__(self, config_path):
         config = self.read_config(config_path)
@@ -54,6 +46,19 @@ class Ashuku:
         except (KeyError, AssertionError) as err:
             print("Error: Config incomplete: %s missing." % err)
             sys.exit(1)
+
+        # optional stuff
+        # what to show instead of an empty cell
+        self.empty_cell = self.settings.get("empty cell", "-")
+        # what units to use when showing time
+        self.time_units = {"hour": self.settings.get("hour", "h"), 
+                           "min" : self.settings.get("min", "m"), 
+                           "sec" : self.settings.get("sec", "s")}
+        # date format, must be unique for every day (otherwise arbitrary)
+        self.date_fmt = self.settings.get("date format", "%Y/%m/%d")
+        
+        # cached date
+        self.today = datetime.today()
 
         data_dir = os.path.dirname(data_path) 
         if not os.path.exists(data_dir):
@@ -173,7 +178,7 @@ class Ashuku:
         col_width = self.parse_col_width(table_data, keys)
 
         # print header
-        header = " " * (self.uni_len(Ashuku.today.strftime(Ashuku.date_fmt)) + 1)
+        header = " " * (self.uni_len(self.today.strftime(self.date_fmt)) + 1)
         header_div = "-" * self.uni_len(header)
         for key in keys:
             # string.center is not used because it doesn't understand
@@ -204,7 +209,7 @@ class Ashuku:
                         else:
                             str = "{}{}".format(value, self.units[key])
                 except KeyError:
-                    str = Ashuku.empty_cell
+                    str = self.empty_cell
                 line += " " * (col_width[key] - self.uni_len(str))
                 line += self.colorize(value, key, str)
             print(line)
@@ -266,12 +271,12 @@ class Ashuku:
 
     def parse_data(self, days):
         table = {}
-        shown_dates = [date for date in self.data if (Ashuku.today - date).days < days]
+        shown_dates = [date for date in self.data if (self.today - date).days < days]
 
         for date in sorted(shown_dates):              
             # I'm honestly not sure if I should just keep the timezone as it is
             # or if I should try to adjust it. I'll keep it as-is for now.
-            day = date.strftime(Ashuku.date_fmt)
+            day = date.strftime(self.date_fmt)
             for attr in self.data[date]:
                 if not attr in self.attributes:
                     continue
@@ -317,11 +322,11 @@ class Ashuku:
         h = value // (60 * 60)
         str = ""
         if h:
-            str += "{}{}".format(h, Ashuku.time_units["hour"]) 
+            str += "{}{}".format(h, self.time_units["hour"]) 
         if m:
-            str += "{}{}".format(m, Ashuku.time_units["min"]) 
+            str += "{}{}".format(m, self.time_units["min"]) 
         if s:
-            str += "{}{}".format(s, Ashuku.time_units["sec"]) 
+            str += "{}{}".format(s, self.time_units["sec"]) 
         return str
 
 def main(args):
