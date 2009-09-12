@@ -245,6 +245,7 @@ class Ashuku:
     def correlate(self):
         table_data = self.parse_data(-1)
         keys = sorted(self.attributes.keys())
+        print("linear correlations:")
         for i in range(0, len(keys)):
             for j in range(i+1, len(keys)):
                 r, a, b = 0, keys[i], keys[j]
@@ -269,7 +270,8 @@ class Ashuku:
                          (math.sqrt(n*sxx - sx*sx) * math.sqrt(n*syy - sy*sy)))
                 except ZeroDivisionError:
                     r = 0
-                print("{:0.2f}: {} <-> {}".format(r, a, b))
+                if n:
+                    print("{:+0.2f} (n={}): {} <-> {}".format(r, n, a, b))
                 
     def graph(self, args):
         # try to parse first argument as days
