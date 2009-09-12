@@ -317,11 +317,8 @@ class Ashuku:
         header = " " * (self.uni_len(self.today.strftime(self.date_fmt)) + 1)
         header_div = "-" * self.uni_len(header)
         for key in keys:
-            # string.center is not used because it doesn't understand
-            # full-width characters
             key_width = self.uni_len(key)
-            print(key, col_width[key], key_width)
-            header += " | " + (" " * (col_width[key] - key_width)) + key
+            header += " | " + self.uni_center(key, col_width[key])
             header_div += "-+-" + ("-" * col_width[key])
         print(header)
         print(header_div)
@@ -352,6 +349,15 @@ class Ashuku:
                 line += self.colorize(value, key, str)
             print(line)
 
+    def uni_center(self, str, width):
+        "Like string.center(), but understands full-width characters."
+        l = self.uni_len(str)
+        rest = width - l
+        if rest > 0:
+            left = rest // 2
+            right = rest - left
+            str = " "*left + str + " "*right
+        return str
     def colorize(self, value, key, str):
         # the behaviour here is somewhat personalized, so you might want to
         # adapt it to your needs
