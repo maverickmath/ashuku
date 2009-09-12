@@ -63,9 +63,9 @@ edits, use a text editor.
 Scoring
 =======
 
-There are two kinds of attributes: qualitative and quantitive.
+There are two kinds of attributes: qualitative and quantitative.
 
-Quantitive scores are for things that can be easily put in numbers, like your 
+quantitative scores are for things that can be easily put in numbers, like your 
 weight or time spent studying.
 
 qualitative scores are things you would normally rate as "good" or "bad". To make 
@@ -87,10 +87,10 @@ Let's say you use the following config:
 ---
 # Each attribute must be of one of the following types:
 # - qualitative (range from -2 to +2)
-# - quantitive
-# - cumulative (like quantitive, but all daily values are added up)
+# - quantitative
+# - cumulative (like quantitative, but all daily values are added up)
 #
-# All quantitive types also take the optional property "unit". When given, it
+# All quantitative types also take the optional property "unit". When given, it
 # will also be optional for input, so that "ashuku add weight 78" and
 # "ashuku add weight 78kg" are identical.
 # The value "time" is used for the format XhYmZs, as in 3h20m10s. When no unit
@@ -106,7 +106,7 @@ attributes:
         type: cumulative
         unit: time
     weight: 
-        type: quantitive
+        type: quantitative
         unit: kg
     日本語:
         type: cumulative

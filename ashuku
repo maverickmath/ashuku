@@ -46,7 +46,7 @@ class Ashuku:
     # regex to match the time representation in the data
     time_re = re.compile("^((?P<hour>\d+)h)?((?P<min>\d+)m)?((?P<sec>\d+)s)?$")
     # all possible attribute types
-    types = {"cumulative", "quantitive", "qualitative"}
+    types = {"cumulative", "quantitative", "qualitative"}
 
     # cached lengths
     length = {}
@@ -63,8 +63,11 @@ class Ashuku:
             self.settings = config["settings"]
             
             data_path = os.path.expanduser(self.settings["path"])
-        except (KeyError, AssertionError) as err:
+        except KeyError as err:
             print("Error: Config incomplete: %s missing." % err)
+            sys.exit(1)
+        except AssertionError:
+            print("Error: Config malformed. Invalid type for attribute '%s'." % attr)
             sys.exit(1)
 
         # optional stuff
@@ -126,10 +129,10 @@ class Ashuku:
             f.write('---\n'
                     '# Each attribute must be of one of the following types:\n'
                     '# - qualitative (range from -2 to +2)\n'
-                    '# - quantitive\n'
-                    '# - cumulative (like quantitive, but all daily values are added up)\n'
+                    '# - quantitative\n'
+                    '# - cumulative (like quantitative, but all daily values are added up)\n'
                     '#\n'
-                    '# All quantitive types also take the optional property "unit". When given, it\n'
+                    '# All quantitative types also take the optional property "unit". When given, it\n'
                     '# will also be optional for input, so that "ashuku add weight 78" and\n'
                     '# "ashuku add weight 78kg" are identical.\n'
                     '# The value "time" is used for the format XhYmZs, as in 3h20m10s. When no unit\n'
@@ -145,7 +148,7 @@ class Ashuku:
                     '        type: cumulative\n'
                     '        unit: time\n'
                     '    weight:\n'
-                    '        type: quantitive\n'
+                    '        type: quantitative\n'
                     '        unit: kg\n'
                     '    日本語:\n'
                     '        type: cumulative\n'
@@ -177,6 +180,32 @@ class Ashuku:
             Ashuku.length[s] = l
         return l
 
+    def add(self, args):
+        print("todo :)")
+
+    def correlate(self):
+        print("todo :)")
+
+    def graph(self, args):
+        # try to parse first argument as days
+        try:
+            days = int(args[0])
+            args = args[1:]
+        except (ValueError, IndexError):
+            days = 14
+        
+        # throw away all attributes we don't wanna show
+        self.filter_attributes(args)
+        
+        # nothing to show
+        if not self.attributes:
+            return
+        
+        print("todo :)")
+
+    def undo(self):
+        print("todo :)")
+    
     def show(self, args):
         # try to parse first argument as days
         try:
