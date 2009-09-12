@@ -31,6 +31,8 @@ class Ashuku:
     date_fmt = "%Y/%m/%d"
     # what units to use when showing time
     time_units = {"hour": "h", "min": "m", "sec": "s"}
+    # what to show instead of an empty cell
+    empty_cell = "none"
     
     # cached lengths
     length = {}
@@ -190,9 +192,9 @@ class Ashuku:
                             str = self.format_time(value)
                         else:
                             str = "{}{}".format(value, self.units[key])
-                        line += " " * (col_width[key] - self.uni_len(str)) + str
                 except KeyError:
-                    line += " " * col_width[key]
+                    str = Ashuku.empty_cell
+                line += " " * (col_width[key] - self.uni_len(str)) + str
             print(line)
 
     def filter_attributes(self, args):
