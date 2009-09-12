@@ -235,6 +235,8 @@ class Ashuku:
             print(line)
 
     def colorize(self, value, key, str):
+        # the behaviour here is somewhat personalized, so you might want to
+        # adapt it to your needs
         color = "none"
         if value != None:
             if self.attributes[key]["type"] == "qualitative":
@@ -242,6 +244,9 @@ class Ashuku:
                     color = "light_green"
                 elif value < 0:
                     color = "light_red"
+            elif self.units[key] == "time":
+                if value < (60*60):
+                    color = "light_grey"
         else:
             color = "red"
         return colors[color] + str + colors["reset"]
