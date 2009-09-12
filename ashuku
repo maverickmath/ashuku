@@ -3,7 +3,7 @@
 # Copyright muflax <mail@muflax.com>, 2009
 # License: GNU GPL 3 <http://www.gnu.org/copyleft/gpl.html>
 
-import os.path, re, sys, unicodedata
+import os.path, re, shutil, sys, tempfile, unicodedata
 from datetime import datetime, timedelta, time
 
 try:
@@ -62,7 +62,7 @@ class Ashuku:
             self.units = self.parse_units()
             self.settings = config["settings"]
             
-            data_path = os.path.expanduser(self.settings["path"])
+            self.data_path = os.path.expanduser(self.settings["path"])
         except KeyError as err:
             print("Error: Config incomplete: %s missing." % err)
             sys.exit(1)
@@ -83,17 +83,17 @@ class Ashuku:
         # cached date
         self.today = datetime.today()
 
-        data_dir = os.path.dirname(data_path) 
-        if not os.path.exists(data_dir):
+        self.data_dir = os.path.dirname(self.data_path) 
+        if not os.path.exists(self.data_dir):
             print("Warning: Directory %s doesn't exist. Creating it for you." %
-                  data_dir)
-            os.mkdir(data_dir)
+                  self.data_dir)
+            os.mkdir(self.data_dir)
             
-        if not os.path.exists(data_path):
+        if not os.path.exists(self.data_path):
             print("Warning: Data file %s doesn't exist. Creating it for you." %
-                  data_path)
+                  self.data_path)
         
-        with open(data_path, "r") as f:
+        with open(self.data_path, "r") as f:
             self.data = yaml.load(f, Loader=Loader)
 
     def parse_command(self, args):
@@ -181,6 +181,7 @@ class Ashuku:
         return l
 
     def add(self, args):
+        #print(self.data)
         print("todo :)")
 
     def correlate(self):
@@ -205,7 +206,24 @@ class Ashuku:
 
     def undo(self):
         print("todo :)")
-    
+    def write_data(self):
+        try:
+            f = tempfile.NamedTemporaryFile(mode="w+", 
+                                            prefix=".ashuku_",
+                                            suffix=".tmp", 
+                                            delete=False,
+                                            dir=self.data_dir)
+        except IOError:
+            print("Error: Couldn't write temporary file.")
+            sys.exit(1)
+        else:
+            f.write(yaml.dump(self.data, 
+                              Dumper=Dumper, 
+                              allow_unicode=True,
+                              default_flow_style=False))
+            f.close()
+            shutil.move(f.name, self.data_path)
+
     def show(self, args):
         # try to parse first argument as days
         try:
@@ -239,7 +257,8 @@ class Ashuku:
         print(header_div)
 
         # print body
-        for day in sorted(table_data):
+        for d in reversed(range(days)):
+            day = (self.today - timedelta(days=d)).strftime(self.date_fmt)
             line = " " + day
             for key in keys:
                 line += " | "
