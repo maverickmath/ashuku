@@ -219,7 +219,7 @@ class Ashuku:
                         sys.exit(1)
                 elif self.is_int(value):
                     value = int(value)
-                elif self.is_float(float):
+                elif self.is_float(value):
                     value = float(value)
                 else:
                     print("Error: Score for '{}' must be a number.".format(key))
