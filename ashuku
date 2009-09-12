@@ -45,8 +45,9 @@ colors = {"none":'',
 class Ashuku:
     # regex to match the time representation in the data
     time_re = re.compile("^((?P<hour>\d+)h)?((?P<min>\d+)m)?((?P<sec>\d+)s)?$")
-    # all possible attribute types
+    # all possible attribute types and commands
     types = {"cumulative", "quantitative", "qualitative"}
+    commands = {"add", "correlate", "graph", "show", "undo"}
 
     # cached lengths
     length = {}
@@ -80,8 +81,11 @@ class Ashuku:
         # date format, must be unique for every day (otherwise arbitrary)
         self.date_fmt = self.settings.get("date format", "%Y/%m/%d")
         
-        # cached date
-        self.today = datetime.today()
+        # cached dates
+        today = datetime.today()
+        now = datetime.now()
+        self.today = datetime(today.year, today.month, today.day)
+        self.now = now.replace(microsecond=0)
 
         self.data_dir = os.path.dirname(self.data_path) 
         if not os.path.exists(self.data_dir):
@@ -102,20 +106,22 @@ class Ashuku:
         else:
             command = "show"
 
-        if "add".startswith(command):
+        command = self.unique_completion(command, Ashuku.commands)
+
+        if command == "add":
             self.add(args[2:])
             self.write_data()
-        elif "correlate".startswith(command):
+        elif command == "correlate":
             self.correlate()
-        elif "graph".startswith(command):
+        elif command == "graph":
             self.graph(args[2:])
-        elif "show".startswith(command):
+        elif command == "show":
             self.show(args[2:])
-        elif "undo".startswith(command):
+        elif command == "undo":
             self.undo()
             self.write_data()
         else:
-            print("Error: No command %s." % command)
+            print("Error: Invalid command %s." % command)
             sys.exit(1)
 
     def read_config(self, path):
@@ -181,8 +187,7 @@ class Ashuku:
         return l
 
     def add(self, args):
-        #print(self.data)
-        print("todo :)")
+        self.data[self.now] = "test"
 
     def correlate(self):
         print("todo :)")
@@ -314,6 +319,22 @@ class Ashuku:
                         pass
                 if not matches:
                     del(self.attributes[attr])
+
+    def unique_completion(self, candidate, targets):
+        matches = []
+        for t in targets:
+            if t.startswith(candidate):
+                matches.append(t)
+        
+        if len(matches) == 0:
+            print("Error: No match found for '{}'.".format(candidate))
+            sys.exit(1)
+        elif len(matches) > 1:
+            print("Error: '{}' could match multiple targets: {}.".format(candidate,
+                                                                         targets))
+            sys.exit(1)
+        else:
+            return matches[0]
 
     def parse_col_width(self, table_data, keys):
         col_width = {}
