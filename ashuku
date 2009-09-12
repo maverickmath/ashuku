@@ -41,6 +41,7 @@ class Ashuku:
 
     def __init__(self, config_path):
         config = self.read_config(config_path)
+        # mandatory stuff
         try:
             self.attributes = config["attributes"]
             for attr in self.attributes:
@@ -63,7 +64,9 @@ class Ashuku:
         if not os.path.exists(data_path):
             print("Warning: Data file %s doesn't exist. Creating it for you." %
                   data_path)
-        self.data = yaml.load(open(data_path, "r"), Loader=Loader)
+        
+        with open(data_path, "r") as f:
+            self.data = yaml.load(f, Loader=Loader)
 
     def parse_command(self, args):
         if len(args) > 1:
@@ -89,11 +92,10 @@ class Ashuku:
 
     def read_config(self, path):
         path = os.path.expanduser(path)
-        if os.path.exists(path):
+        try:
             f = open(path, "r")
-            config = yaml.load(f, Loader=Loader)
-        else:
-            print("No config found. Creating %s for you. Modify to your liking." %
+        except IOError as err:
+            print("Couldn't open config. Trying to create %s for you. Modify to your liking." %
                   path)
             f = open(path, "w")
             f.write('---\n'
@@ -130,6 +132,10 @@ class Ashuku:
                     '...')
             sys.exit(1)
 
+        else:
+            config = yaml.load(f, Loader=Loader)
+        finally:
+            f.close()
         return config
 
     def uni_len(self, s):
@@ -183,11 +189,15 @@ class Ashuku:
             line = " " + day
             for key in keys:
                 line += " | "
-                str = ""
+                str = value = None
                 try:
                     value = table_data[day][key]
                     if self.attributes[key]["type"] == "qualitative":
-                        str = "{:+d}".format(value)
+                        # I don't like +0 :)
+                        if value == 0:
+                            str = " 0"
+                        else:
+                            str = "{:+d}".format(value)
                     else:
                         if self.units[key] == "time":
                             str = self.format_time(value)
@@ -195,8 +205,17 @@ class Ashuku:
                             str = "{}{}".format(value, self.units[key])
                 except KeyError:
                     str = Ashuku.empty_cell
-                line += " " * (col_width[key] - self.uni_len(str)) + str
+                line += " " * (col_width[key] - self.uni_len(str))
+                line += self.colorize(value, key, str)
             print(line)
+
+    def colorize(self, value, key, str):
+        color = ""
+        if value != None:
+            pass
+        else:
+            color = '\033[1;31m'
+        return color + str + "\033[0m"
 
     def filter_attributes(self, args):
         if args:
