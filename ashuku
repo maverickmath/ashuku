@@ -32,7 +32,7 @@ class Ashuku:
     # what units to use when showing time
     time_units = {"hour": "h", "min": "m", "sec": "s"}
     # what to show instead of an empty cell
-    empty_cell = "none"
+    empty_cell = "-"
     
     # cached lengths
     length = {}
@@ -183,10 +183,11 @@ class Ashuku:
             line = " " + day
             for key in keys:
                 line += " | "
+                str = ""
                 try:
                     value = table_data[day][key]
                     if self.attributes[key]["type"] == "qualitative":
-                        line += "{:+d}".format(value)
+                        str = "{:+d}".format(value)
                     else:
                         if self.units[key] == "time":
                             str = self.format_time(value)
