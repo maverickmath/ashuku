@@ -232,6 +232,13 @@ class Ashuku:
             except KeyError:
                 self.data[self.now] = [ {key: value} ]
             print("Adding:", key, value)
+        
+        # print missing scores
+        table_data = self.parse_data(1)
+        today = self.today.strftime(self.date_fmt)
+        missing = [key for key in self.attributes if key not in table_data[today]]
+        if missing:
+            print("Missing:", ", ".join(sorted(missing)))
 
     def is_int(self, x):
         try: 
