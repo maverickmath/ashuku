@@ -119,30 +119,34 @@ We can add our daily weight:
 
     # ashuku add weight 82
     Adding: weight 82
-    Missing: happiness, sleep, 日本語.
+    Missing: happiness, sleep, 日本語
 
 Let's take a short nap and study some Japanese.
     
     # ashuku a sle 20m jap 30m
     Adding: sleep 20m
     Adding: 日本語 30m
-    Missing: happiness.
+    Missing: happiness
 
 Note the use of abbreviations.
 Having done this, I feel pretty good. So let's add it:
 
-    # ashuku happ +1
-    Score for happiness added.
+    # ashuku a happ +1
+    Adding: happiness 1
 
 Actually, I feel really good. Let's undo it.
 
     # ashuku undo
-    Undone: happiness +1.
-    # ashuku happ 2
-    Score for happiness added.
+    Undoing 2009-09-12 12:24:18:
+    -> happiness 1
+    # ashuku a happ 2
+    Adding: happiness 1
 
 Note that +2 and 2 are identical. 
-Let's show our summary for today:
+Let's show our summary for the last 2 days:
 
-    # ashuku show 1  
-    #TODO :)
+    # ashuku show 2  
+                | happiness | sleep | weight | 日本語
+    ------------+-----------+-------+--------+-------
+     2009/09/11 |         - |     - |      - |      -
+     2009/09/12 |        +2 |   20m |   82kg |    30m
