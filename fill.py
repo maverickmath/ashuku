@@ -16,7 +16,7 @@ def main():
     for i in range(1000):
         dt = timedelta(days=random.randint(0, 365), seconds=random.randint(0,60*60*24))
         d = datetime.now() - dt
-        data[d.strftime("%Y-%m-%d %H:%M:%S")] = random.choice(entries).copy()
+        data[d.strftime("%Y-%m-%d %H:%M:%S")] = [random.choice(entries).copy()]
 
     print(yaml.dump(data, default_flow_style=False, allow_unicode=True).replace("'", ""))
 
