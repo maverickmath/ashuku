@@ -1,7 +1,8 @@
 ashuku is a tool to track a multitude of daily statistics, like mood and 
-health. Its design goals are simplicity and fast usage. ashuku can draw graphs 
-and analyze data for correlation. Data is stored in plain text files in an easy 
-to read (for both humans and machines) format.
+health. Its design goals are simplicity and fast usage. 
+ashuku can draw graphs [citation needed] and analyze data for correlation. 
+Data is stored in plain text files in YAML. It's easy to read for both humans 
+and machines.
 
 ashuku is named after one of the 5 Wisdom Buddhas, 阿閦如来 (ashuku nyorai). 
 He is immovable and reflects all emotions like a mirror, showing things as they 
@@ -14,7 +15,6 @@ Dependencies
 
 * Python 3 (although the code is probably compatible with Python 2.6)
 * PyYAML
-* matplotlib (optional, for drawing graphs)
 
 Usage
 =====
@@ -46,8 +46,9 @@ Analyzes all attributes for statistical correlation.
 
 graph
 -----
-Graphs the statistics for the last 2 weeks. Takes the amount of days to graph as 
-an optional argument, like "graph 23".
+Prints comma-separated data so you can draw a graph. Well, originally, ashuku
+would draw it for you, but matplotlib isn't yet Python3-compatible, so...
+Takes the amount of days to graph as an optional argument, like "graph 23".
 
 show
 ----
@@ -116,14 +117,15 @@ attributes:
 
 We can add our daily weight:
 
-    # ashuku add weight 82kg
-    Score for weight added. 
+    # ashuku add weight 82
+    Adding: weight 82
     Missing: happiness, sleep, 日本語.
 
 Let's take a short nap and study some Japanese.
     
     # ashuku a sle 20m jap 30m
-    Scores for sleep and 日本語 added. 
+    Adding: sleep 20m
+    Adding: 日本語 30m
     Missing: happiness.
 
 Note the use of abbreviations.

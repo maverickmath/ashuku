@@ -96,9 +96,11 @@ class Ashuku:
         if not os.path.exists(self.data_path):
             print("Warning: Data file {} doesn't exist. Creating it for you.".format(
                   self.data_path))
+            f = open(self.data_path, "w")
+            f.close()
         
         with open(self.data_path, "r") as f:
-            self.data = yaml.load(f, Loader=Loader)
+            self.data = yaml.load(f, Loader=Loader) or {}
 
     def parse_command(self, args):
         if len(args) > 1:
@@ -199,7 +201,7 @@ class Ashuku:
                 sys.exit(1)
             key = self.unique_completion(key, self.attributes)
            
-           # some sanity checks
+            # some sanity checks
             if self.attributes[key]["type"] == "qualitative":
                 try:
                     value = int(value)
@@ -288,7 +290,29 @@ class Ashuku:
         if not self.attributes:
             return
         
-        print("todo :)")
+        keys = sorted(self.attributes.keys())
+        table_data = self.parse_data(days)
+
+        # header
+        print(",".join(keys))
+        
+        # body
+        for d in reversed(range(days)):
+            day = (self.today - timedelta(days=d)).strftime(self.date_fmt)
+            line = []
+            for key in keys:
+                str = value = None
+                try:
+                    value = table_data[day][key]
+                    if self.units[key] == "time":
+                        str = self.format_time(value, graph=True)
+                    else:
+                        str = "{}".format(value)
+                except KeyError:
+                    str = ""
+                line.append(str)
+            print(",".join(line))
+
 
     def undo(self):
         keys = sorted(self.data.keys())
@@ -422,7 +446,11 @@ class Ashuku:
     def unique_completion(self, candidate, targets):
         matches = []
         for t in targets:
-            if t.startswith(candidate):
+            try:
+                alias = self.attributes[t]["alias"]
+            except KeyError:
+                alias = ""
+            if (t.startswith(candidate) or alias.startswith(candidate)):
                 matches.append(t)
         
         if len(matches) == 0:
@@ -468,10 +496,7 @@ class Ashuku:
 
     def parse_data(self, days):
         table = {}
-        if days == -1:
-            shown_dates = self.data
-        else:
-            shown_dates = [date for date in self.data if (self.today - date).days < days]
+        shown_dates = [date for date in self.data if (self.today - date).days < days]
 
         for date in sorted(shown_dates):              
             # I'm honestly not sure if I should just keep the timezone as it is
@@ -520,17 +545,20 @@ class Ashuku:
         sec = int(sec or "0")
         return hour * 3600 + min * 60 + sec
                             
-    def format_time(self, value):
+    def format_time(self, value, graph=False):
         s = value % 60
         m = value // 60 % 60
         h = value // (60 * 60)
         str = ""
-        if h:
-            str += "{}{}".format(h, self.time_units["hour"]) 
-        if m:
-            str += "{}{}".format(m, self.time_units["min"]) 
-        if s:
-            str += "{}{}".format(s, self.time_units["sec"]) 
+        if graph:
+            str = "{:d}:{:02d}:{:02d}".format(h, m, s)
+        else:
+            if h:
+                str += "{}{}".format(h, self.time_units["hour"]) 
+            if m:
+                str += "{}{}".format(m, self.time_units["min"]) 
+            if s:
+                str += "{}{}".format(s, self.time_units["sec"]) 
         return str
 
 def main(args):
