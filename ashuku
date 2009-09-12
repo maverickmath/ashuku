@@ -23,9 +23,19 @@ if PROFILE:
     import pstats
 
 class Ashuku:
-    length = {}
+    # regex to match the time representation in the data
     time_re = re.compile("^((?P<hour>\d+)h)?((?P<min>\d+)m)?((?P<sec>\d+)s)?$")
-    types = {"cumulative", "quantitive", "qualitive"}
+    # all possible attribute types
+    types = {"cumulative", "quantitive", "qualitative"}
+    # date format, must be unique for every day (otherwise arbitrary)
+    date_fmt = "%Y/%m/%d"
+    # what units to use when showing time
+    time_units = {"hour": "h", "min": "m", "sec": "s"}
+    
+    # cached lengths
+    length = {}
+    # cached date
+    today = datetime.today()
 
     def __init__(self, config_path):
         config = self.read_config(config_path)
@@ -34,6 +44,7 @@ class Ashuku:
             for attr in self.attributes:
                 t = self.attributes[attr]["type"]
                 assert t in Ashuku.types
+            self.units = self.parse_units()
             self.settings = config["settings"]
             
             data_path = os.path.expanduser(self.settings["path"])
@@ -85,7 +96,7 @@ class Ashuku:
             f = open(path, "w")
             f.write('---\n'
                     '# Each attribute must be of one of the following types:\n'
-                    '# - qualitive (range from -2 to +2)\n'
+                    '# - qualitative (range from -2 to +2)\n'
                     '# - quantitive\n'
                     '# - cumulative (like quantitive, but all daily values are added up)\n'
                     '#\n'
@@ -100,7 +111,7 @@ class Ashuku:
                     '\n'
                     'attributes:\n'
                     '    happiness:\n'
-                    '        type: qualitive\n'
+                    '        type: qualitative\n'
                     '    sleep:\n'
                     '        type: cumulative\n'
                     '        unit: time\n'
@@ -142,13 +153,57 @@ class Ashuku:
             days = 14
         
         # throw away all attributes we don't wanna show
+        self.filter_attributes(args)
+        
+        # nothing to show
+        if not self.attributes:
+            return
+
+        # commence building table!
+        keys = sorted(self.attributes.keys())
+        table_data = self.parse_data(days)
+        col_width = self.parse_col_width(table_data, keys)
+
+        # print header
+        header = " " * (self.uni_len(Ashuku.today.strftime(Ashuku.date_fmt)) + 1)
+        header_div = "-" * self.uni_len(header)
+        for key in keys:
+            # string.center is not used because it doesn't understand
+            # full-width characters
+            key_width = self.uni_len(key)
+            header += " | " + (" " * (col_width[key] - key_width)) + key
+            header_div += "-+-" + ("-" * col_width[key])
+        print(header)
+        print(header_div)
+
+        # print body
+        for day in sorted(table_data):
+            line = " " + day
+            for key in keys:
+                line += " | "
+                try:
+                    value = table_data[day][key]
+                    if self.attributes[key]["type"] == "qualitative":
+                        line += "{:+d}".format(value)
+                    else:
+                        if self.units[key] == "time":
+                            str = self.format_time(value)
+                        else:
+                            str = "{}{}".format(value, self.units[key])
+                        line += " " * (col_width[key] - self.uni_len(str)) + str
+                except KeyError:
+                    line += " " * col_width[key]
+            print(line)
+
+    def filter_attributes(self, args):
         if args:
             attrs = list(self.attributes.keys())
             for attr in attrs:
                 matches = False
                 for f in args:
                     try:    
-                        if attr.startswith(f) or self.attributes[attr]["alias"].startswith(f):
+                        if (attr.startswith(f) 
+                            or self.attributes[attr]["alias"].startswith(f)):
                             matches = True
                             break
                     except KeyError:
@@ -156,29 +211,45 @@ class Ashuku:
                 if not matches:
                     del(self.attributes[attr])
 
-        keys = sorted(self.attributes.keys())
+    def parse_col_width(self, table_data, keys):
+        col_width = {}
+        for key in keys:
+            if self.attributes[key]["type"] == "qualitative":
+                col_width[key] = max(2, self.uni_len(key))
+            else:
+                widths = [0]
+                for day in table_data:
+                    try:
+                        if self.units[key] == "time":
+                            v = table_data[day][key]
+                            str = self.format_time(v)
+                        else:
+                            str = "{}{}".format(table_data[day][key], 
+                                                self.units[key])
+                        widths.append(self.uni_len(str))
+                    except KeyError:
+                        pass
 
-        # print header
-        header = " " * (self.uni_len("09-09-09") + 1)
-        header2 = "-" * self.uni_len(header)
-        for attr in keys:
-            header += " | " + attr
-            header2 += "-+-" + "-" * self.uni_len(attr)
-        print(header)
-        print(header2)
+                col_width[key] = max(max(widths), self.uni_len(key))
+        return col_width
 
-        # print body
-        table_data = self.parse_data(days)
+    def parse_units(self):
+        units = {}
+        for attr in self.attributes:
+            try:
+                units[attr] = self.attributes[attr]["unit"]
+            except KeyError:
+                units[attr] = ""
+        return units
 
     def parse_data(self, days):
         table = {}
-        today = datetime.today()
-        shown_dates = [date for date in self.data if (today - date).days < days]
+        shown_dates = [date for date in self.data if (Ashuku.today - date).days < days]
 
-        for date in sorted(shown_dates):
+        for date in sorted(shown_dates):              
             # I'm honestly not sure if I should just keep the timezone as it is
             # or if I should try to adjust it. I'll keep it as-is for now.
-            day = date.strftime("%Y/%m/%d")
+            day = date.strftime(Ashuku.date_fmt)
             for attr in self.data[date]:
                 if not attr in self.attributes:
                     continue
@@ -217,6 +288,19 @@ class Ashuku:
         min = int(min or "0")
         sec = int(sec or "0")
         return hour * 3600 + min * 60 + sec
+                            
+    def format_time(self, value):
+        s = value % 60
+        m = value // 60 % 60
+        h = value // (60 * 60)
+        str = ""
+        if h:
+            str += "{}{}".format(h, Ashuku.time_units["hour"]) 
+        if m:
+            str += "{}{}".format(m, Ashuku.time_units["min"]) 
+        if s:
+            str += "{}{}".format(s, Ashuku.time_units["sec"]) 
+        return str
 
 def main(args):
     A = Ashuku("~/.ashuku")

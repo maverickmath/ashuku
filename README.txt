@@ -63,12 +63,12 @@ edits, use a text editor.
 Scoring
 =======
 
-There are two kinds of attributes: qualitive and quantitive.
+There are two kinds of attributes: qualitative and quantitive.
 
 Quantitive scores are for things that can be easily put in numbers, like your 
 weight or time spent studying.
 
-Qualitive scores are things you would normally rate as "good" or "bad". To make 
+qualitative scores are things you would normally rate as "good" or "bad". To make 
 scoring easy, only 5 values are allowed, ranging from -2 to +2. Instead of 
 having to precise variables that can't rate efficiently anymore, it's better to 
 use more variables. For example, if you think that "mood" is too complex for 
@@ -86,7 +86,7 @@ Let's say you use the following config:
     
 ---
 # Each attribute must be of one of the following types:
-# - qualitive (range from -2 to +2)
+# - qualitative (range from -2 to +2)
 # - quantitive
 # - cumulative (like quantitive, but all daily values are added up)
 #
@@ -101,7 +101,7 @@ Let's say you use the following config:
 
 attributes:
     happiness:
-        type: qualitive
+        type: qualitative
     sleep: 
         type: cumulative
         unit: time
