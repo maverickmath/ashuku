@@ -22,12 +22,32 @@ if PROFILE:
     import cProfile as profile
     import pstats
 
+colors = {"none":'',
+          "black":'\033[0;30m',
+          "red":'\033[0;31m',
+          "green":'\033[0;32m',
+          "brown":"\033[0;33m",
+          "blue":"\033[0;34m",\
+          "purple":"\033[0;35m",
+          "cyan":"\033[0;36m",
+          "light_grey":"\033[0;37m",
+          "dark_grey":"\033[1;30m",
+          "light_red":"\033[1;31m",
+          "light_green":"\033[1;32m",
+          "yellow":"\033[1;33m",
+          "light_blue":"\033[1;34m",
+          "light_purple":"\033[1;35m",
+          "light_cyan":"\033[1;36m",
+          "white":"\033[1;37m",
+          "reset":"\033[0m", 
+         }
+
 class Ashuku:
     # regex to match the time representation in the data
     time_re = re.compile("^((?P<hour>\d+)h)?((?P<min>\d+)m)?((?P<sec>\d+)s)?$")
     # all possible attribute types
     types = {"cumulative", "quantitive", "qualitative"}
-    
+
     # cached lengths
     length = {}
 
@@ -215,12 +235,16 @@ class Ashuku:
             print(line)
 
     def colorize(self, value, key, str):
-        color = ""
+        color = "none"
         if value != None:
-            pass
+            if self.attributes[key]["type"] == "qualitative":
+                if value > 0:
+                    color = "light_green"
+                elif value < 0:
+                    color = "light_red"
         else:
-            color = '\033[1;31m'
-        return color + str + "\033[0m"
+            color = "red"
+        return colors[color] + str + colors["reset"]
 
     def filter_attributes(self, args):
         if args:
