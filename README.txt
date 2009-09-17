@@ -69,8 +69,8 @@ There are two kinds of attributes: qualitative and quantitative.
 quantitative scores are for things that can be easily put in numbers, like your 
 weight or time spent studying.
 
-qualitative scores are things you would normally rate as "good" or "bad". To make 
-scoring easy, only 5 values are allowed, ranging from -2 to +2. Instead of 
+qualitative scores are things you would normally rate as "good" or "bad". To 
+make scoring easy, only 5 values are allowed, ranging from -2 to +2. Instead of 
 having to precise variables that can't rate efficiently anymore, it's better to 
 use more variables. For example, if you think that "mood" is too complex for 
 only 5 values, than split up "mood", like "motivation", "happiness" and 
@@ -150,3 +150,17 @@ Let's show our summary for the last 2 days:
     ------------+-----------+-------+--------+-------
      2009/09/11 |         - |     - |      - |      -
      2009/09/12 |        +2 |   20m |   82kg |    30m
+
+Config
+======
+
+The config is stored under ~/.ashuku (in YAML, just as the data). You must
+specify all attributes and the location of your data as demonstrated in the
+previous example. Additionally, you may specify any of the following optional
+settings:
+
+    settings:
+        empty cell: none # what to show instead of an empty cell
+        hour: h          # \
+        min: m           #  > units for hours, minutes and seconds
+        sec: s           # /
