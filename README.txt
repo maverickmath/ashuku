@@ -160,7 +160,11 @@ previous example. Additionally, you may specify any of the following optional
 settings:
 
     settings:
-        empty cell: none # what to show instead of an empty cell
-        hour: h          # \
-        min: m           #  > units for hours, minutes and seconds
-        sec: s           # /
+        empty cell: none      # shown instead of an empty cell
+        
+        hour: h               # \
+        min: m                #  > units for hours, minutes and seconds
+        sec: s                # /
+        
+        date format: %Y/%m/%d # must be unique for every day, otherwise 
+                              # arbitrary; usual date format syntax
