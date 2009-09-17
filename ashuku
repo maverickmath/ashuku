@@ -236,7 +236,8 @@ class Ashuku:
         # print missing scores
         table_data = self.parse_data(1)
         today = self.today.strftime(self.date_fmt)
-        missing = [key for key in self.attributes if key not in table_data[today]]
+        already_answered = set(table_data.get(today, []))
+        missing = [key for key in self.attributes if key not in already_answered]
         if missing:
             print("Missing:", ", ".join(sorted(missing)))
 
