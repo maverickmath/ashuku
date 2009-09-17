@@ -500,13 +500,8 @@ class Ashuku:
         return col_width
 
     def parse_units(self):
-        units = {}
-        for attr in self.attributes:
-            try:
-                units[attr] = self.attributes[attr]["unit"]
-            except KeyError:
-                units[attr] = ""
-        return units
+        return {attr: self.attributes[attr].get("unit", "") 
+                for attr in self.attributes}
 
     def parse_data(self, days):
         table = {}
@@ -526,26 +521,17 @@ class Ashuku:
                     try:
                         td = table[day]
                         if self.attributes[attr]["type"] == "cumulative":
-                            try:
-                                old_value = table[day][attr]
-                            except KeyError:
-                                old_value = 0
+                            old_value = table[day].get(attr, 0)
                             
-                            try:
-                                if self.attributes[attr]["unit"] == "time":
-                                    value = self.parse_time(value)
-                            except KeyError:
-                                pass
+                            if self.units[attr] == "time":
+                                value = self.parse_time(value)
                             
                             value += old_value
 
                         table[day][attr] = value
                     except KeyError:
-                        try:
-                            if self.attributes[attr]["unit"] == "time":
-                                value = self.parse_time(value)
-                        except KeyError:
-                            pass
+                        if self.units[attr] == "time":
+                            value = self.parse_time(value)
                         table[day] = {attr: value}
 
         return table
