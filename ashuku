@@ -529,7 +529,7 @@ class Ashuku:
         if days == -1:
             shown_dates = self.data
         else:
-            shown_dates = [date for date in self.data if (self.today - date).days < days]
+            shown_dates = [date for date in self.data if (self.today - date).days < days - 1]
 
         for date in sorted(shown_dates):              
             # I'm honestly not sure if I should just keep the timezone as it is
