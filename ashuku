@@ -112,16 +112,14 @@ class Ashuku:
 
         if command == "add":
             self.add(args[2:])
-            self.write_data()
         elif command == "correlate":
-            self.correlate()
+            self.correlate(args[2:])
         elif command == "graph":
             self.graph(args[2:])
         elif command == "show":
             self.show(args[2:])
         elif command == "undo":
             self.undo()
-            self.write_data()
         else:
             print("Error: Invalid command {}.".format(command))
             sys.exit(1)
@@ -189,6 +187,8 @@ class Ashuku:
         return l
 
     def add(self, args):
+        write = bool(args)
+
         while args:   
             try:
                 key = args.pop(0)
@@ -232,6 +232,9 @@ class Ashuku:
             except KeyError:
                 self.data[self.now] = [ {key: value} ]
             print("Adding:", key, value)
+
+        if write:
+            self.write_data()
         
         # print missing scores
         table_data = self.parse_data(1)
@@ -252,8 +255,14 @@ class Ashuku:
             return (float(x), True)[1]
         except (ValueError, TypeError):
             return False
-    def correlate(self):
-        table_data = self.parse_data(-1)
+    def correlate(self, args):
+        try:
+            days = int(args[0])
+            args = args[1:]
+        except (ValueError, IndexError, TypeError):
+            days = -1
+        
+        table_data = self.parse_data(days)
         keys = sorted(self.attributes.keys())
         print("linear correlations:")
         correlations = []
@@ -265,10 +274,20 @@ class Ashuku:
                 sx = sy = sxx = syy = sxy = n = 0
                 for day in table_data:
                     # get all complete pairs
-                    try:
-                        x, y = table_data[day][a], table_data[day][b]
-                    except KeyError:
-                        continue
+                    if self.attributes[a]["type"] == "cumulative" and days > 0:
+                        x = table_data[day].get(a, 0)
+                    else:
+                        try:
+                            x = table_data[day][a]
+                        except KeyError:
+                            continue
+                    if self.attributes[b]["type"] == "cumulative" and days > 0:
+                        y = table_data[day].get(b, 0)
+                    else:
+                        try:
+                            y = table_data[day][b]
+                        except KeyError:
+                            continue
                     
                     n += 1
                     sxy += x*y
@@ -332,14 +351,16 @@ class Ashuku:
         keys = sorted(self.data.keys())
         try:
             undo_key = keys[-1]
+        except IndexError:
+            print("No data left; doing nothing.")
+            sys.exit(0)
+        else:
             print("Undoing {}:".format(undo_key))
             for pairs in self.data[undo_key]:
                 for k, v in pairs.items():
                     print("->", k, v)
             del(self.data[undo_key])
-        except IndexError:
-            print("No data left; doing nothing.")
-            sys.exit(0)
+            self.write_data()
 
     def write_data(self):
         try:

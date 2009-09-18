@@ -40,9 +40,14 @@ Scores the given attributes, like "add happiness +2 stress -2", or shorter,
 ashuku will also show you all attributes you have not yet scored for this day. 
 You should give at least a daily score, but can give as many as you want. 
 
+Using add without arguments only shows the missing attributes.
+
 correlate
 ---------
-Analyzes all attributes for statistical correlation.
+Analyzes all attributes for statistical correlation. Takes the amount of days 
+to correlate as an optional argument, like "correlate 23". The data is assumed
+to be complete when days are given, i.e. attributes of type "cumulative" are
+assumed to be 0 when no score for the day exists.
 
 graph
 -----
