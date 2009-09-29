@@ -57,11 +57,12 @@ Works like "show".
 
 show
 ----
-Shows the statistics for the last 2 weeks. Takes the amount of days to show as 
-an optional argument, like "show 42". You can also specify the attributes you
-want to show, like "show 42 happiness" or just "show happiness". If you put a
-"-" in front of an attribute, it won't be shown, i.e. "show -happiness" shows
-everything but happines. 
+Shows the statistics for the last 2 weeks. Optionally, the first numerical
+argument will be interpreted as the amount of days to show, like "show 42". 
+
+You can also specify the attributes you want to show, like "show 42 happiness"
+or just "show happiness". If you put a "-" in front of an attribute, it won't be
+shown, i.e. "show -happiness" shows everything but happines. 
 
 undo
 ----
@@ -109,6 +110,8 @@ Let's say you use the following config:
 # 
 # An attribute can also be declared optional by setting "optional" to "true". In
 # this case, it won't be shown among the missing attributes for the day.
+#
+# Also, don't start any name with a "-" or make it a number, k?
 
 attributes:
     happiness:
