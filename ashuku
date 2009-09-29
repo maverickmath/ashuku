@@ -476,7 +476,7 @@ class Ashuku:
         # all attributes that are not shown
         neg_filter = {a[1:] for a in args if a.startswith("-")}
         # if not empty, show only those attributes
-        pos_filter = {a[1:] for a in args if not a.startswith("-")}
+        pos_filter = {a for a in args if not a.startswith("-")}
 
         for f in neg_filter:
             attrs = list(self.attributes)
