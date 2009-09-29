@@ -60,7 +60,13 @@ class Ashuku:
             for attr in self.attributes:
                 t = self.attributes[attr]["type"]
                 assert t in Ashuku.types
-            self.units = self.parse_units()
+            self.units = {attr: self.attributes[attr].get("unit", "") 
+                          for attr in self.attributes}
+            self.optional = {attr: self.attributes[attr].get("optional", False) 
+                             for attr in self.attributes}
+            self.alias = {attr: self.attributes[attr].get("alias", "") 
+                          for attr in self.attributes}
+
             self.settings = config["settings"]
             
             self.data_path = os.path.expanduser(self.settings["path"])
@@ -236,13 +242,17 @@ class Ashuku:
         if write:
             self.write_data()
         
-        # print missing scores
-        table_data = self.parse_data(1)
-        today = self.today.strftime(self.date_fmt)
-        already_answered = set(table_data.get(today, []))
-        missing = [key for key in self.attributes if key not in already_answered]
+        missing = self.missing(self.today)
         if missing:
             print("Missing:", ", ".join(sorted(missing)))
+
+    def missing(self, date):
+        # return missing scores for date
+        table_data = self.parse_data(date=date)
+        day = date.strftime(self.date_fmt)
+        already_answered = set(table_data.get(day, []))
+        return [key for key in self.attributes 
+                if (key not in already_answered and not self.optional[key])]
 
     def is_int(self, x):
         try: 
@@ -324,7 +334,7 @@ class Ashuku:
             return
         
         keys = sorted(self.attributes.keys())
-        table_data = self.parse_data(days)
+        table_data = self.parse_data(days=days)
 
         # header
         print(",".join(keys))
@@ -397,7 +407,7 @@ class Ashuku:
 
         # commence building table!
         keys = sorted(self.attributes.keys())
-        table_data = self.parse_data(days)
+        table_data = self.parse_data(days=days)
         col_width = self.parse_col_width(table_data, keys)
 
         # print header
@@ -471,30 +481,21 @@ class Ashuku:
         for f in neg_filter:
             attrs = list(self.attributes)
             for attr in attrs:
-                try:
-                    if (attr.startswith(f) 
-                        or self.attributes[attr]["alias"].startswith(f)):
-                        del(self.attributes[attr])
-                except KeyError:
-                    pass
+                if (attr.startswith(f) 
+                    or self.alias[attr].startswith(f)):
+                    del(self.attributes[attr])
         
         for f in pos_filter:
             attrs = list(self.attributes)
             for attr in attrs:
-                try:
-                    if (not attr.startswith(f) 
-                        and not self.attributes[attr]["alias"].startswith(f)):
-                        del(self.attributes[attr])
-                except KeyError:
-                    pass
+                if (not attr.startswith(f) 
+                    and not self.alias[attr].startswith(f)):
+                    del(self.attributes[attr])
 
     def unique_completion(self, candidate, targets):
         matches = []
         for t in targets:
-            try:
-                alias = self.attributes[t]["alias"]
-            except KeyError:
-                alias = ""
+            alias = self.alias.get(t, "")
             if (t.startswith(candidate) or alias.startswith(candidate)):
                 matches.append(t)
         
@@ -530,16 +531,15 @@ class Ashuku:
                 col_width[key] = max(max(widths), self.uni_len(key))
         return col_width
 
-    def parse_units(self):
-        return {attr: self.attributes[attr].get("unit", "") 
-                for attr in self.attributes}
 
-    def parse_data(self, days):
+    def parse_data(self, days=-1, date=None):
         table = {}
-        if days == -1:
+        if date:
+            shown_dates = [d for d in self.data if (date - d).days < 1]
+        elif days == -1:
             shown_dates = self.data
         else:
-            shown_dates = [date for date in self.data if (self.today - date).days < days - 1]
+            shown_dates = [d for d in self.data if (self.today - d).days < days - 1]
 
         for date in sorted(shown_dates):              
             # I'm honestly not sure if I should just keep the timezone as it is
