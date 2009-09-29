@@ -53,13 +53,15 @@ graph
 -----
 Prints comma-separated data so you can draw a graph. Well, originally, ashuku
 would draw it for you, but matplotlib isn't yet Python3-compatible, so...
-Takes the amount of days to graph as an optional argument, like "graph 23".
+Works like "show".
 
 show
 ----
 Shows the statistics for the last 2 weeks. Takes the amount of days to show as 
 an optional argument, like "show 42". You can also specify the attributes you
-want to show, like "show 42 happiness" or just "show happiness".
+want to show, like "show 42 happiness" or just "show happiness". If you put a
+"-" in front of an attribute, it won't be shown, i.e. "show -happiness" shows
+everything but happines. 
 
 undo
 ----
@@ -104,6 +106,9 @@ Let's say you use the following config:
 #
 # You can also specify an alias via "alias". The normal name will be used for
 # the output, but it may be inconvenient to type.
+# 
+# An attribute can also be declared optional by setting "optional" to "true". In
+# this case, it won't be shown among the missing attributes for the day.
 
 attributes:
     happiness:
