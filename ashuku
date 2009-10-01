@@ -237,6 +237,8 @@ class Ashuku:
                 self.data[self.now].append( {key: value} )
             except KeyError:
                 self.data[self.now] = [ {key: value} ]
+            if self.units[key] != "time":
+                value = "{}{}".format(value, self.units[key])
             print("Adding:", key, value)
 
         if write:
