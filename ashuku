@@ -490,18 +490,18 @@ class Ashuku:
                     or self.alias[attr].startswith(f)):
                     del(self.attributes[attr])
         
-        attrs = list(self.attributes)
-        new_attrs = set()
-        for f in pos_filter:
-            for attr in attrs:
-                if (attr.startswith(f) 
-                    or self.alias[attr].startswith(f)):
-                    new_attrs.add(attr)
+        if pos_filter:
+            attrs = list(self.attributes)
+            new_attrs = set()
+            for f in pos_filter:
+                for attr in attrs:
+                    if (attr.startswith(f) 
+                        or self.alias[attr].startswith(f)):
+                        new_attrs.add(attr)
 
-        for attr in attrs:
-            if attr not in new_attrs:
-                del(self.attributes[attr])
-                    
+            for attr in attrs:
+                if attr not in new_attrs:
+                    del(self.attributes[attr])
     
     def unique_completion(self, candidate, targets):
         matches = []
