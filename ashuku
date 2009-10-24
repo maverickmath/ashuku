@@ -502,12 +502,14 @@ class Ashuku:
             for attr in attrs:
                 if attr not in new_attrs:
                     del(self.attributes[attr])
-    
     def unique_completion(self, candidate, targets):
         matches = []
+        candidate = candidate.lower()
         for t in targets:
-            alias = self.alias.get(t, "")
-            if (t.startswith(candidate) or alias.startswith(candidate)):
+            t = t.lower()
+            alias = self.alias.get(t, "").lower()
+            if (t.startswith(candidate) 
+                or alias.startswith(candidate)):
                 matches.append(t)
         
         if len(matches) == 0:
