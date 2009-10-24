@@ -484,24 +484,27 @@ class Ashuku:
         pos_filter = {a for a in args if not a.startswith("-")}
 
         for f in neg_filter:
+            f = f.lower()
             attrs = list(self.attributes)
             for attr in attrs:
-                if (attr.startswith(f) 
-                    or self.alias[attr].startswith(f)):
+                if (attr.lower().startswith(f) 
+                    or self.alias[attr].lower().startswith(f)):
                     del(self.attributes[attr])
         
         if pos_filter:
             attrs = list(self.attributes)
             new_attrs = set()
             for f in pos_filter:
+                f = f.lower()
                 for attr in attrs:
-                    if (attr.startswith(f) 
-                        or self.alias[attr].startswith(f)):
+                    if (attr.lower().startswith(f) 
+                        or self.alias[attr].lower().startswith(f)):
                         new_attrs.add(attr)
 
             for attr in attrs:
                 if attr not in new_attrs:
                     del(self.attributes[attr])
+
     def unique_completion(self, candidate, targets):
         matches = []
         cl = candidate.lower()
