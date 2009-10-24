@@ -504,11 +504,11 @@ class Ashuku:
                     del(self.attributes[attr])
     def unique_completion(self, candidate, targets):
         matches = []
-        candidate = candidate.lower()
+        cl = candidate.lower()
         for t in targets:
-            t = t.lower()
+            tl = t.lower()
             alias = self.alias.get(t, "").lower()
-            if (t.startswith(candidate) 
+            if (tl.startswith(candidate) 
                 or alias.startswith(candidate)):
                 matches.append(t)
         
