@@ -289,20 +289,49 @@ class Ashuku:
         
         missing = self.missing(self.today)
         if missing:
-            print("Missing:", ", ".join(sorted(missing)))
+            missing_str = []
+            for attr in sorted(missing):
+                v = missing[attr]
+                if not v:
+                    missing_str.append(attr)
+                else:
+                    if self.units[attr] == "time":
+                        v = self.format_time(v)
+                    else:
+                        v = "{}{}".format(v, self.units[attr])
+                    missing_str.append("{} ({})".format(attr, v))
+
+            print("Missing:", ", ".join(missing_str))
 
     def missing(self, date):
-        # return missing scores for date
+        # return which attributes are missing for date (and by how much)
         table_data = self.parse_data(date=date)
+        if not table_data:
+            return None
+        
         day = date.strftime(self.date_fmt)
         
-        # don't count as answered if min value is not reached
-        already_answered = set(attr for attr in table_data.get(day, [])
-                               if (self.min[attr] != None and
-                                   table_data[day].get(attr) >= self.min[attr]))
-        
-        return [key for key in self.attributes 
-                if (key not in already_answered and not self.optional[key])]
+        missing = {}
+        for attr in self.attributes:
+            # skip optional attributes
+            if self.optional[attr]:
+                continue
+
+            # how much is missing, if anything?
+            value = table_data[day].get(attr, None)
+            m = self.min[attr]
+            lacking = 0
+            if m != None:
+                if value == None:
+                    lacking = m
+                elif value < m:
+                    lacking = m - value
+                else:
+                    continue
+
+            missing[attr] = lacking
+            
+        return missing
 
     def is_int(self, x):
         try: 
