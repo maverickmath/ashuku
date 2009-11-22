@@ -295,7 +295,12 @@ class Ashuku:
         # return missing scores for date
         table_data = self.parse_data(date=date)
         day = date.strftime(self.date_fmt)
-        already_answered = set(table_data.get(day, []))
+        
+        # don't count as answered if min value is not reached
+        already_answered = set(attr for attr in table_data.get(day, [])
+                               if (self.min[attr] != None and
+                                   table_data[day].get(attr) >= self.min[attr]))
+        
         return [key for key in self.attributes 
                 if (key not in already_answered and not self.optional[key])]
 
