@@ -504,20 +504,20 @@ class Ashuku:
             str = " "*left + str + " "*right
         return str
     def colorize(self, value, key, str):
-        # the behaviour here is somewhat personalized, so you might want to
-        # adapt it to your needs
-        color = "none"
+        color = self.colors["default"]
         if value != None:
             if self.attributes[key]["type"] == "qualitative":
                 if value > 0:
-                    color = "light_green"
+                    color = self.colors["pos"]
                 elif value < 0:
-                    color = "light_red"
-            elif self.units[key] == "time":
-                if value < (60*60):
-                    color = "grey"
+                    color = self.colors["neg"]
+            else: # quantitative 
+                if self.min[key] != None and value < self.min[key]:
+                    color = self.colors["min"]
+                if self.max[key] != None and value > self.max[key]:
+                    color = self.colors["max"]
         else:
-            color = "red"
+            color = self.colors["none"]
         return colors[color] + str + colors["reset"]
 
     def filter_attributes(self, args):

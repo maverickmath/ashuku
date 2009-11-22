@@ -217,7 +217,6 @@ case, it won't be shown among the missing attributes for the day.
 You may declare a "min" and/or "max" value for any quantitative type. If a
 values is below "min" or above "max", it will be highlighted. "ashuku add" will
 also inform you if a cumulative attribute has not yet reached its "min" value.
-The default value for any missing attribute is assumed to be 0.
 
 Colors
 ------
@@ -229,7 +228,7 @@ white.
 
 The following options for colors are available:
 
-color_default   -> normal text color
+color_default   -> normal color for values
 color_min       -> color for quantitative values below their "min" value
 color_max       -> color for quantitative values above their "max" value
 color_neg       -> color for qualitative values below 0
