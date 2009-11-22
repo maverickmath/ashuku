@@ -108,9 +108,6 @@ Let's say you use the following config:
 # You can also specify an alias via "alias". The normal name will be used for
 # the output, but it may be inconvenient to type.
 # 
-# An attribute can also be declared optional by setting "optional" to "true". In
-# this case, it won't be shown among the missing attributes for the day.
-#
 # Also, don't start any name with a "-" or make it a number, k?
 
 attributes:
@@ -167,13 +164,16 @@ Let's show our summary for the last 2 days:
 Config
 ======
 
+Settings
+--------
+
 The config is stored under ~/.ashuku (in YAML, just as the data). You must
 specify all attributes and the location of your data as demonstrated in the
 previous example. Additionally, you may specify any of the following optional
-settings:
+settings (with defaults shown):
 
     settings:
-        empty cell: none      # shown instead of an empty cell
+        empty cell: none      # text shown instead of an empty cell
         
         hour: h               # \
         min: m                #  > units for hours, minutes and seconds
@@ -181,3 +181,58 @@ settings:
         
         date format: %Y/%m/%d # must be unique for every day, otherwise 
                               # arbitrary; usual date format syntax
+
+        color_default: white  # see section "Colors"
+        color_min: light_red
+        color_max: light_red
+        color_neg: light_red
+        color_pos: light_green
+        color_none: red
+
+Attributes
+----------
+
+For each attribute, you must define a type, which may either be "qualitative" (a
+range from -2 to +2, meant for things like mood), "quantitive" (anything you can
+count) or "cumulative". The difference between "quantitive" and "cumulative" is
+that "quantitive" has only one associated value per day and any new entry
+overwrites the old one, while "cumulative" adds up all values per day.
+
+All quantitative types also take the optional property "unit". When given, it
+will also be optional for input, so that "ashuku add weight 78" and "ashuku add
+weight 78kg" are identical.  The value "time" is used for the format XhYmZs, as
+in 3h20m10s. When no unit is given, then minutes are assumed.
+
+Optional
+--------
+
+The following settings can be defined for each attribute, if you want them.
+
+You can specify an alias via "alias". The normal name will be used for the
+output, but it may be inconvenient to type.
+
+An attribute can be declared optional by setting "optional" to "true". In this
+case, it won't be shown among the missing attributes for the day.
+
+You may declare a "min" and/or "max" value for any quantitative type. If a
+values is below "min" or above "max", it will be highlighted. "ashuku add" will
+also inform you if a cumulative attribute has not yet reached its "min" value.
+The default value for any missing attribute is assumed to be 0.
+
+Colors
+------
+
+You may change the default colors. ashuku supports the normal ANSI shell colors,
+i.e. black, red, green, brown, blue, purple, cyan and grey. You may prefix any
+color with "light_" as well. Note however that light_grey is instead called
+white.
+
+The following options for colors are available:
+
+color_default   -> normal text color
+color_min       -> color for quantitative values below their "min" value
+color_max       -> color for quantitative values above their "max" value
+color_neg       -> color for qualitative values below 0
+color_pos       -> color for qualitative values above 0
+color_none      -> color for missing entries
+
