@@ -54,18 +54,16 @@ class Ashuku:
 
     def __init__(self, config_path):
         config = self.read_config(config_path)
-        # mandatory stuff
+        
+        ###################
+        # mandatory stuff #
+        ###################
+        
         try:
             self.attributes = config["attributes"]
             for attr in self.attributes:
                 t = self.attributes[attr]["type"]
                 assert t in Ashuku.types
-            self.units = {attr: self.attributes[attr].get("unit", "") 
-                          for attr in self.attributes}
-            self.optional = {attr: self.attributes[attr].get("optional", False) 
-                             for attr in self.attributes}
-            self.alias = {attr: self.attributes[attr].get("alias", "") 
-                          for attr in self.attributes}
 
             self.settings = config["settings"]
             
@@ -77,15 +75,60 @@ class Ashuku:
             print("Error: Config malformed. Invalid type for attribute '{}'.".format(attr))
             sys.exit(1)
 
-        # optional stuff
+        ##################
+        # optional stuff #
+        ##################
+        
+        # units
+        self.units = {attr: self.attributes[attr].get("unit", "") 
+                      for attr in self.attributes}
+
+        # is the attribute optional?
+        self.optional = {attr: self.attributes[attr].get("optional", False) 
+                         for attr in self.attributes}
+
+        # aliases
+        self.alias = {attr: self.attributes[attr].get("alias", "") 
+                      for attr in self.attributes}
+        
+        # min values
+        self.min = {attr: self.attributes[attr].get("min", None) 
+                    for attr in self.attributes}
+        
+        # max values
+        self.max = {attr: self.attributes[attr].get("max", None) 
+                    for attr in self.attributes}
+
+        # convert min/max values if unit = time
+        for attr in self.attributes:
+            if self.units[attr] == "time":
+                if self.min[attr]:
+                    self.min[attr] = self.parse_time(self.min[attr])
+                if self.max[attr]:
+                    self.max[attr] = self.parse_time(self.max[attr])
+
         # what to show instead of an empty cell
         self.empty_cell = self.settings.get("empty cell", "-")
+        
         # what units to use when showing time
         self.time_units = {"hour": self.settings.get("hour", "h"), 
                            "min" : self.settings.get("min", "m"), 
                            "sec" : self.settings.get("sec", "s")}
+        
         # date format, must be unique for every day (otherwise arbitrary)
         self.date_fmt = self.settings.get("date format", "%Y/%m/%d")
+        
+        # read colors
+        self.colors = {}
+        for color, default in (("default", "white"),
+                               ("min", "light_red"),
+                               ("max", "light_red"),
+                               ("neg", "light_red"),
+                               ("pos", "light_green"),
+                               ("none", "red")
+                              ):
+            name = "color_" + color
+            self.colors[color] = self.settings.get(name, default)
         
         # cached dates
         today = datetime.today()
@@ -472,7 +515,7 @@ class Ashuku:
                     color = "light_red"
             elif self.units[key] == "time":
                 if value < (60*60):
-                    color = "light_grey"
+                    color = "grey"
         else:
             color = "red"
         return colors[color] + str + colors["reset"]
