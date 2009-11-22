@@ -318,15 +318,18 @@ class Ashuku:
                 continue
 
             # how much is missing, if anything?
-            value = table_data[day].get(attr, None)
             m = self.min[attr]
             lacking = 0
             if m != None:
+                value = table_data[day].get(attr, None)
                 if value == None:
                     lacking = m
                 elif value < m:
                     lacking = m - value
                 else:
+                    continue
+            else:
+                if attr in table_data[day]:
                     continue
 
             missing[attr] = lacking
