@@ -305,11 +305,8 @@ class Ashuku:
 
     def missing(self, date):
         # return which attributes are missing for date (and by how much)
-        table_data = self.parse_data(date=date)
-        if not table_data:
-            return None
-        
         day = date.strftime(self.date_fmt)
+        table_data = self.parse_data(date=date).get(day, {})
         
         missing = {}
         for attr in self.attributes:
@@ -321,7 +318,7 @@ class Ashuku:
             m = self.min[attr]
             lacking = 0
             if m != None:
-                value = table_data[day].get(attr, None)
+                value = table_data.get(attr, None)
                 if value == None:
                     lacking = m
                 elif value < m:
@@ -329,7 +326,7 @@ class Ashuku:
                 else:
                     continue
             else:
-                if attr in table_data[day]:
+                if attr in table_data:
                     continue
 
             missing[attr] = lacking
