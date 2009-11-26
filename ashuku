@@ -484,7 +484,7 @@ class Ashuku:
         self.filter_attributes(args)
 
         # nothing to show
-        if not self.attributes:
+        if not self.attributes or days <= 0:
             return
 
         # commence building table!
