@@ -606,12 +606,13 @@ class Ashuku:
             return matches[0]
 
     def parse_col_width(self, table_data, keys):
+        #FIXME: this looks way overcomplicated...
         col_width = {}
         for key in keys:
             if self.attributes[key]["type"] == "qualitative":
                 col_width[key] = max(2, self.uni_len(key))
             else:
-                widths = []
+                widths = 0
                 for day in table_data:
                     try:
                         if self.units[key] == "time":
@@ -620,11 +621,11 @@ class Ashuku:
                         else:
                             str = "{}{}".format(table_data[day][key], 
                                                 self.units[key])
-                        widths.append(self.uni_len(str))
+                        widths = max(widths, self.uni_len(str))
                     except KeyError:
-                        widths.append(self.uni_len(self.empty_cell))
+                        widths = max(widths, self.uni_len(self.empty_cell))
 
-                col_width[key] = max(max(widths), self.uni_len(key))
+                col_width[key] = max(widths, self.uni_len(key))
         return col_width
 
 
