@@ -398,12 +398,15 @@ class Ashuku:
             print("{:+0.2f} (n={}): {} <-> {}".format(r, n, a, b))
                 
     def graph(self, args):
-        # try to parse first argument as days
-        try:
-            days = int(args[0])
-            args = args[1:]
-        except (ValueError, IndexError, TypeError):
-            days = 14
+        # parse first numerical argument as days
+        days = 14
+        for i, a in enumerate(args):
+            try:
+                days = int(a)
+                args = args[:i] + args[(i+1):]
+                break
+            except (ValueError, IndexError, TypeError):
+                continue
         
         # throw away all attributes we don't wanna show
         self.filter_attributes(args)
