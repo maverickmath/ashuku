@@ -299,7 +299,10 @@ class Ashuku:
                         v = self.format_time(v)
                     else:
                         v = "{}{}".format(v, self.units[attr])
-                    missing_str.append("{} ({})".format(attr, v))
+                    missing_str.append("{} ({}{}{})".format(attr, 
+                                                            colors["light_red"],
+                                                            v,
+                                                           colors["reset"]))
 
             print("Missing:", ", ".join(missing_str))
 
